@@ -1,0 +1,596 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Task list management API",
+    "description": "# Introduction\n\nThe API allows user to manage a list of tasks. To access the list of tasks the user must be logged in the system. The user has access only to their tasks without the possibility to assign a task to another user.\n\n# Authentication\n\nTo access tasks API endpoints, you must provide a valid Bearer token in a header\n(`Authorization: Bearer YOUR_TOKEN`).\n\nSome API endpoints allow unauthenticated requests for public resources and\nthey can be called without an API key.\n\n# Errors\n\nAll successful API requests will be returned with a 200 or 201 status code\nand `ok: true` in the response payload.\n",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost/api",
+      "description": "Local"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Represents user authentication.\n"
+    },
+    {
+      "name": "Tasks",
+      "description": "Represent grouping of user tasks management.\n"
+    }
+  ],
+  "paths": {
+    "/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login",
+        "description": "API login endpoint.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "email",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "password",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User Auth token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Logout",
+        "description": "API user logout.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "example": "Bearer user_token_value",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logout message",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "You have been successfully logged out."
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User is not be logged in.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Unauthenticated."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks": {
+      "get": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Get tasks list",
+        "description": "Retrieve user tasks list.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "example": "Bearer user_token_value",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter[status]",
+            "description": "Filter tasks by specified status.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "ToDo",
+                "Done"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter[priority]",
+            "description": "Filter tasks by specified priority.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter[title]",
+            "description": "Search tasks tiwh specified string in title.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter[description]",
+            "description": "Search tasks tiwh specified string in description.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort[priority]",
+            "description": "Sort tasks by priority.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort[createdAt]",
+            "description": "Sort tasks by created_at field.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort[completedAt]",
+            "description": "Sort tasks by completed_at field.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "Specify page for paginated results.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User tasks collection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskCollection"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Create new task",
+        "description": "Create new task for logged in user.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "example": "Bearer user_token_value",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "description": "Task title.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "description",
+            "description": "Task description.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "priority",
+            "description": "Task priority. The value could be between 1 and 5.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "parent",
+            "description": "Parent task ID. Specify 0 for task without parent.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created Task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{task}": {
+      "get": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Get Task",
+        "description": "Get information about the task.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "example": "Bearer user_token_value",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "task",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "Numeric ID of the task to update."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Update task",
+        "description": "Update created task.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "example": "Bearer user_token_value",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "task",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "Numeric ID of the task to update."
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "description": "Task title.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "description",
+            "description": "Task description.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "priority",
+            "description": "Task priority. The value could be between 1 and 5.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "parent",
+            "description": "Parent task ID. Specify 0 for task without parent.",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated Task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Delete Task",
+        "description": "Delete task.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "example": "Bearer user_token_value",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "task",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "Numeric ID of the task to update."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task deletion result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeletedObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Task deletion error.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "id": 1,
+                  "deleted": false,
+                  "message": "Completed tasks cannot be deleted."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tasks/{task}/complete": {
+      "post": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Complete Task",
+        "description": "Mark task as complete if possible.",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "example": "Bearer user_token_value",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "task",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "Numeric ID of the task to update."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Task"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Token": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Bearer token value.",
+            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiZWU2MGRkMmVjZmQxZTc0NzAzYmY5NmM1YzI0NjEwZjQ1NTk2ODEyOTJjMGYwMzI1OTVjNzkyMWExZmMzY2Q1OTAxYjQ3OWQ5ZTIxMzk1YTUiLCJpYXQiOjE2OTk4MTE1MDYuMTM2Mzg3LCJuYmYiOjE2OTk4MTE1MDYuMTM2MzksImV4cCI6MTczMTQzMzkwNS43MjI0MzksInN1YiI6IjIiLCJzY29wZXMiOltdfQ.Rp2899Rwwgbefl6_cAcaqb1mVt4S40rITQNU14-pRz1_MUY4PtKsEmgzCiEmZ4KLJF1GfP2kMkb3b1T5G-SF4fNhuuX0G7cc-moBu6iy-nR3wMFDXdzu35c87av6mObcx7tXBIo2VqsnanZls9lnSBd0zWHmeIXXKX95990cPVB6BDwZpi4-zXZ3GTjJYPTxRsjy7hlqSeAPU6nQXiseWuHqmVN1tbftHoi5SHDcj5RaykfI4Xwqlv0zUjwhf-Gstewof6j2vKjZo7O6SlWXdB1q148Gvn1WKRnOWDcfjbYNDWViVgWGf8MuP_6FX8AisPSJhkh9SGMx-QyPucILLwhQq4jLQlv6edhBrXPQFlhohaFfAcWC5QDBQSviHc2SXOR9kLlWvT0hC81aSIeKnXSRqC_F6N97MtI7OtDNV6KpIjE3Y5TP3gr2b521mi5leX8RE3kVw57y7tZVKCwvK-6rIitBoi36ZpnIcMg25prZFwQlkh6q1TAQx1WAn4ZWZW_jWZFEGDyf4x4hpRzMp5oGzRuyPHAv6qL9jVFUGcWwIMcAexIQiDQikmfHczEikPjmEOQR1IyoSKkD8dbk8F6A9insgrx9KSoG4XxIMC2xNXzrGwoYkp9q_DHvwsRMopZtjOwJlKXJgvlqOeibJC-CzkxPyR5M9dU7WsSWDvo"
+          }
+        }
+      },
+      "DeletedObject": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Deleted object ID."
+          },
+          "deleted": {
+            "type": "boolean",
+            "description": "Is object deleted."
+          }
+        }
+      },
+      "Task": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Task object ID."
+          },
+          "title": {
+            "type": "string",
+            "description": "Task title."
+          },
+          "description": {
+            "type": "string",
+            "description": "Task description text."
+          },
+          "status": {
+            "type": "string",
+            "description": "Task status."
+          },
+          "priority": {
+            "type": "integer",
+            "description": "Task priority."
+          },
+          "owner_id": {
+            "type": "integer",
+            "description": "ID of the user who created the task."
+          },
+          "parent_id": {
+            "type": "integer",
+            "description": "Parent task ID."
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date",
+            "description": "Task creation date and time."
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "Date and time when task was completed."
+          }
+        }
+      },
+      "TaskCollection": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Task"
+            }
+          },
+          "links": {
+            "example": {
+              "first": "http://localhost/api/tasks?page=1",
+              "last": "http://localhost/api/tasks?page=10",
+              "prev": "http://localhost/api/tasks?page=4",
+              "next": "http://localhost/api/tasks?page=6"
+            }
+          },
+          "meta": {
+            "example": {
+              "current_page": 4,
+              "from": 40,
+              "last_page": 10,
+              "path": "http://localhost/api/tasks",
+              "per_page": 10,
+              "to": 50,
+              "total": 100
+            }
+          }
+        }
+      }
+    }
+  }
+}
