@@ -11,6 +11,7 @@ services:
       args:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
+    container_name: tasks_api_app
     ports:
       - "80:80"
     volumes:
@@ -27,6 +28,7 @@ services:
       args:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
+    container_name: tasks_api_php
     ports:
       - "9000:9000"
     volumes:
@@ -69,6 +71,7 @@ services:
       args:
         - UID=${UID:-1000}
         - GID=${GID:-1000}
+    container_name: tasks_api_artisan
     volumes:
       - ./laravel-app/:/var/www/html:delegated
     depends_on:
