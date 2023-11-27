@@ -20,9 +20,9 @@ class TaskService
 {
     private TaskRepositoryInterface $repository;
 
-    public function __construct()
+    public function __construct(TaskRepositoryInterface $repository)
     {
-        $this->repository = new TaskRepository();
+        $this->repository = $repository;
     }
 
     /**
@@ -43,7 +43,10 @@ class TaskService
      */
     public function getFilteredTasks(FilterTasksDTO $filter, SortTasksDTO $sort)
     {
-        return $this->repository->getFilteredData($filter, $sort);
+        $filter_data = array_filter($filter->toArray());
+        $sort_data   = array_filter($sort->toArray());
+
+        return $this->repository->getFilteredData($filter_data, $sort_data);
     }
 
     /**
@@ -53,7 +56,7 @@ class TaskService
      */
     public function storeTask(CreateTaskDTO $data)
     {
-        return $this->repository::create($data);
+        return $this->repository->create($data);
     }
 
     /**
@@ -66,7 +69,7 @@ class TaskService
      */
     public function updateTask(Task $task, UpdateTaskDTO $data)
     {
-        return $this->repository::update($task, $data);
+        return $this->repository->update($task, $data);
     }
 
     /**
@@ -77,7 +80,7 @@ class TaskService
      */
     public function deleteTask(Task $task): void
     {
-        $this->repository->delete($task);
+        $task->delete();
     }
 
     /**
@@ -88,7 +91,7 @@ class TaskService
      */
     public function isTaskCompleted(Task $task): bool
     {
-        return TaskRepository::isCompleted($task);
+        return $this->repository->isCompleted($task);
     }
 
     /**

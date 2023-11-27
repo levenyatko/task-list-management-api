@@ -16,11 +16,4 @@ class LoginDataDTO
     ) {
     }
 
-    public function all(): array
-    {
-        return [
-            'email'    => $this->email,
-            'password' => $this->password,
-        ];
-    }
 }

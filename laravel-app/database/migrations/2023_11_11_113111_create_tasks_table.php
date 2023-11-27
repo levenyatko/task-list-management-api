@@ -11,21 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $available_statuses = \App\Enums\TaskStatusEnum::toArray();
-
-        Schema::create('tasks', function (Blueprint $table) use ($available_statuses) {
+        Schema::create('tasks', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('parent_id')->nullable();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->enum('status', $available_statuses);
+            $table->integer('status');
             $table->unsignedTinyInteger('priority');
             $table->timestamps();
             $table->timestamp('completed_at')->nullable();
 
             $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('parent_id')->references('id')->on('tasks')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('parent_id')->references('id')->on('tasks');
         });
     }
 

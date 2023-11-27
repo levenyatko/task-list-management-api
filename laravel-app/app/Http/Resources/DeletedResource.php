@@ -16,7 +16,6 @@ class DeletedResource extends JsonResource
     {
         return [
             'id'      => $this->resource->id,
-            'deleted' => true,
         ];
     }
 }

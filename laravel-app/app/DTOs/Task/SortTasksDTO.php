@@ -20,12 +20,7 @@ class SortTasksDTO
     ) {
     }
 
-    public function getFilled(): array
-    {
-        return array_filter($this->all());
-    }
-
-    public function all(): array
+    public function toArray(): array
     {
         return [
             'priority'     => $this->priority,

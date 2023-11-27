@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources\Task;
 
+use Carbon\Carbon;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -21,9 +23,9 @@ class TaskResource extends JsonResource
             'status'       => $this->resource->status,
             'priority'     => $this->resource->priority,
             'owner_id'     => $this->resource->user_id,
-            'parent_id'    => (empty($this->resource->parent_id)) ? 0 : $this->resource->parent_id,
-            'created_at'   => $this->resource->created_at,
-            'completed_at' => $this->resource->completed_at,
+            'parent_id'    => $this->resource->parent_id,
+            'created_at'   => Carbon::parse($this->resource->created_at)->format(DateTime::ATOM),
+            'completed_at' => Carbon::parse($this->resource->completed_at)->format(DateTime::ATOM),
         ];
     }
 }

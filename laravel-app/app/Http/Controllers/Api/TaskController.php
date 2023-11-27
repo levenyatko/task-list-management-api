@@ -44,7 +44,7 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request, TaskService $service): \Illuminate\Http\JsonResponse
     {
-        $created = $service->storeTask(CreateTaskDTO::fromRequest($request));
+        $created = $service->storeTask($request->getTaskData());
 
         if ($created) {
             return response()->json(new TaskResource($created), 201);
@@ -74,7 +74,7 @@ class TaskController extends Controller
      */
     public function update(UpdateTaskRequest $request, Task $task, TaskService $service): \Illuminate\Http\JsonResponse
     {
-        $updated = $service->updateTask($task, UpdateTaskDTO::fromRequest($request));
+        $updated = $service->updateTask($task, $request->getTaskData());
 
         if ($updated) {
             return response()->json(new TaskResource($updated));
@@ -93,14 +93,20 @@ class TaskController extends Controller
     public function destroy(Task $task, TaskService $service): \Illuminate\Http\JsonResponse
     {
         if (!$service->isTaskCompleted($task)) {
-            $service->deleteTask($task);
+
+            try{
+                $service->deleteTask($task);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'message' => 'Failed to delete the task.'
+                ], 400);
+            }
 
             return response()->json(new DeletedResource($task));
+
         }
 
         return response()->json([
-            'id'      => $task->id,
-            'deleted' => false,
             'message' => 'Completed tasks cannot be deleted.'
         ], 400);
     }

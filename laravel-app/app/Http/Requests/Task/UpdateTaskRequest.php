@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Task;
 
+use App\DTOs\Task\UpdateTaskDTO;
+use App\Enums\TaskStatusEnum;
 use App\Rules\TaskOwnership;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -33,5 +35,18 @@ class UpdateTaskRequest extends FormRequest
                 new TaskOwnership(),
             ],
         ];
+    }
+
+    public function getTaskData(): UpdateTaskDTO
+    {
+        $validated = $this->validated();
+
+        return new UpdateTaskDTO(
+            $validated['title'],
+            $validated['description'],
+            TaskStatusEnum::TODO,
+            $validated['priority'],
+            $validated['parent']
+        );
     }
 }

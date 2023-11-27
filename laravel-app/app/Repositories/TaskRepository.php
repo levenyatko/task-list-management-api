@@ -10,8 +10,6 @@
 namespace App\Repositories;
 
 use App\DTOs\Task\CreateTaskDTO;
-use App\DTOs\Task\FilterTasksDTO;
-use App\DTOs\Task\SortTasksDTO;
 use App\DTOs\Task\UpdateTaskDTO;
 use App\Enums\TaskStatusEnum;
 use App\Models\Task;
@@ -24,9 +22,16 @@ class TaskRepository implements TaskRepositoryInterface
      * @param CreateTaskDTO $data
      * @return mixed
      */
-    public static function create(CreateTaskDTO $data): Task
+    public function create(CreateTaskDTO $data): Task
     {
-        return Task::create($data->all());
+        return Task::create([
+            'user_id'     => $data->user_id,
+            'title'       => $data->title,
+            'description' => $data->description,
+            'status'      => $data->status,
+            'priority'    => $data->priority,
+            'parent_id'   => $data->parent_id,
+        ]);
     }
 
     /**
@@ -37,9 +42,15 @@ class TaskRepository implements TaskRepositoryInterface
      *
      * @return Task
      */
-    public static function update(Task $task, UpdateTaskDTO $new_data): Task
+    public function update(Task $task, UpdateTaskDTO $new_data): Task
     {
-        $task->update($new_data->all());
+        $task->update([
+            'title'       => $new_data->title,
+            'description' => $new_data->description,
+            'status'      => $new_data->status,
+            'priority'    => $new_data->priority,
+            'parent_id'   => (empty($new_data->parent_id)) ? null : $new_data->parent_id,
+        ]);
 
         return $task;
     }
@@ -50,7 +61,7 @@ class TaskRepository implements TaskRepositoryInterface
      * @param int $taskId ID to get Task.
      * @return Task
      */
-    public static function getById(int $taskId): Task
+    public function getById(int $taskId): Task
     {
         return Task::findOrFail($taskId);
     }
@@ -70,28 +81,17 @@ class TaskRepository implements TaskRepositoryInterface
         return false;
     }
 
-    public static function isCompleted(Task $task): bool
+    public function isCompleted(Task $task): bool
     {
-        if (TaskStatusEnum::Done === $task->status) {
+        if (TaskStatusEnum::DONE === $task->status) {
             return true;
         }
         return false;
     }
 
-    /**
-     * Delete task.
-     *
-     * @param Task $task Task to delete.
-     * @return void
-     */
-    public static function delete(Task $task): void
+    public function complete(Task $task)
     {
-        $task->delete();
-    }
-
-    public static function complete(Task $task)
-    {
-        $task->status = TaskStatusEnum::Done;
+        $task->status = TaskStatusEnum::DONE;
         $task->completed_at = Carbon::now()->toDateTimeString();
         $task->save();
     }
@@ -103,13 +103,13 @@ class TaskRepository implements TaskRepositoryInterface
      * @param bool $haveUncompleted
      * @return bool
      */
-    public static function haveUncompletedSubtasks(Task $task, bool $haveUncompleted = false): bool
+    public function haveUncompletedSubtasks(Task $task, bool $haveUncompleted = false): bool
     {
         $subtasks = $task->subTasks()->get();
 
         foreach ($subtasks as $subtask) {
-            if (self::isCompleted($subtask)) {
-                $haveUncompleted = self::haveUncompletedSubtasks($subtask, $haveUncompleted);
+            if ($this->isCompleted($subtask)) {
+                $haveUncompleted = $this->haveUncompletedSubtasks($subtask, $haveUncompleted);
             } else {
                 return true;
             }
@@ -118,12 +118,9 @@ class TaskRepository implements TaskRepositoryInterface
         return $haveUncompleted;
     }
 
-    public static function getFilteredData(FilterTasksDTO $filter, SortTasksDTO $sort)
+    public function getFilteredData(array $filter_data, array $sort_data)
     {
         $where_filter = [];
-
-        $filter_data = $filter->getFilled();
-        $sort_data   = $sort->getFilled();
 
         if (!empty($filter_data)) {
             foreach ($filter_data as $key => $value) {

@@ -9,12 +9,7 @@
 
 namespace App\Enums;
 
-use App\Traits\EnumToArray;
-
-enum TaskStatusEnum: string
-{
-    use EnumToArray;
-
-    case Todo = 'ToDo';
-    case Done = 'Done';
+enum TaskStatusEnum: int{
+    case TODO = 20;
+    case DONE = 40;
 }

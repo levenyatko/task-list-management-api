@@ -14,11 +14,4 @@ class NewAccessTokenDTO
         public readonly string $token,
     ) {
     }
-
-    public function all(): array
-    {
-        return [
-            'token'    => $this->token,
-        ];
-    }
 }

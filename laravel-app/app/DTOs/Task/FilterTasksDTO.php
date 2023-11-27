@@ -14,20 +14,15 @@ use App\Http\Requests\Task\StoreTaskRequest;
 class FilterTasksDTO
 {
     public function __construct(
-        public readonly int $user_id,
-        public readonly string $title,
-        public readonly string $description,
-        public readonly string $status,
-        public readonly int $priority,
+        public int $user_id,
+        public string $title,
+        public string $description,
+        public string $status,
+        public int $priority,
     ) {
     }
 
-    public function getFilled(): array
-    {
-        return array_filter($this->all());
-    }
-
-    public function all(): array
+    public function toArray(): array
     {
         return [
             'user_id'     => $this->user_id,

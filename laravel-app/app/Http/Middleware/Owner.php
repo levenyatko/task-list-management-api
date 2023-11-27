@@ -25,8 +25,8 @@ class Owner
         }
 
         return response()->json([
-            'code'      =>  401,
+            'code'      =>  403,
             'message'   =>  'You must be the task owner.',
-        ], 401);
+        ], 403);
     }
 }
